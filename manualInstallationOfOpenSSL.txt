@@ -1,0 +1,79 @@
+I'll help you rebuild curl with OpenSSL 3.x support. Here's the step-by-step process:
+
+First, let's install the build dependencies:
+
+bashCopysudo apt-get update
+sudo apt-get install -y build-essential nghttp2 libnghttp2-dev libssh2-1-dev
+
+Download and compile OpenSSL 3.x first (if not already done):
+
+bashCopywget https://www.openssl.org/source/openssl-3.0.12.tar.gz
+tar -xf openssl-3.0.12.tar.gz
+cd openssl-3.0.12
+./config --prefix=/usr/local --openssldir=/usr/local/ssl
+make
+sudo make install
+
+Now download and compile curl with OpenSSL 3.x support:
+
+bashCopywget https://curl.se/download/curl-8.5.0.tar.gz
+tar -xf curl-8.5.0.tar.gz
+cd curl-8.5.0
+./configure --with-openssl=/usr/local --with-nghttp2
+make
+sudo make install
+
+Update the shared library cache:
+
+bashCopysudo ldconfig
+
+Verify the new curl installation:
+
+bashCopycurl --version
+
+Check the OpenSSL version that curl is using:
+
+bashCopyldd /usr/local/bin/curl | grep ssl
+After these steps, if you experience any issues with FreeSWITCH, you might need to rebuild it as well to ensure compatibility with the new OpenSSL version. Would you like me to help you with that next? CopyRetryClaude does not have the ability to run the code it generates yet.Ecurl --version
+curl: error while loading shared libraries: libssl.so.3: cannot open shared object file: No such file or directory
+[16:19] [server1.edcast.online curl-8.5.0] # ldd /usr/local/bin/curl  | grep ssl
+        libssl.so.3 => not foundEditThis error occurs because the system can't find the OpenSSL 3.x libraries. Let's fix the library path:
+
+First, let's find where libssl.so.3 is located:
+
+bashCopyfind /usr/local -name "libssl.so.3*"
+
+Create a configuration file for the new library path:
+
+bashCopysudo bash -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/openssl.conf'
+
+Update the library cache:
+
+bashCopysudo ldconfig
+
+Verify that the library is now found:
+
+bashCopyldd /usr/local/bin/curl | grep ssl
+If that doesn't work, you can also try creating symbolic links:
+bashCopy# Find the exact path of your libssl.so.3
+sudo ln -s /usr/local/lib/libssl.so.3 /usr/lib/libssl.so.3
+sudo ln -s /usr/local/lib/libcrypto.so.3 /usr/lib/libcrypto.so.3
+sudo ldconfig
+After running these commands, try curl --version again. Let me know what output you get and I can help you troubleshoot further if needed. CopyRetryClaude does not have the ability to run the code it generates yet.Efind /usr/local -name "libssl.so.3*"
+/usr/local/lib64/libssl.so.3EditAh, I see the issue - the library is in lib64 instead of lib. Let's fix the paths:
+
+Create a configuration file pointing to lib64:
+
+bashCopysudo bash -c 'echo "/usr/local/lib64" > /etc/ld.so.conf.d/openssl.conf'
+
+Create symbolic links to make sure everything can find the libraries:
+
+bashCopysudo ln -s /usr/local/lib64/libssl.so.3 /usr/lib/libssl.so.3
+sudo ln -s /usr/local/lib64/libcrypto.so.3 /usr/lib/libcrypto.so.3
+
+Update the library cache:
+
+bashCopysudo ldconfig
+Now try:
+bashCopycurl --version
+This should resolve the library not found error. Let me know what output you get.
