@@ -95,4 +95,23 @@ sudo ldconfig
 # Now try:
 
 curl --version
-#This should resolve the library not found error. Let me know what output you get.
+# This should resolve the library not found error. Let me know what output you get.
+# You maybe having issues with the location of the file but once you find it paths:
+# we'll move to the below info 
+
+# Create a configuration file pointing to lib64: then
+
+sudo bash -c 'echo "/usr/local/lib64" > /etc/ld.so.conf.d/openssl.conf'
+
+# Create symbolic links to make sure everything can find the libraries:
+
+sudo ln -s /usr/local/lib64/libssl.so.3 /usr/lib/libssl.so.3
+sudo ln -s /usr/local/lib64/libcrypto.so.3 /usr/lib/libcrypto.so.3
+
+# Update the library cache:
+
+sudo ldconfig
+# Now try:
+curl --version
+
+# This should resolve the library not found error. Let me know what output you get.
