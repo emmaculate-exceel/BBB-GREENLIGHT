@@ -1,0 +1,27 @@
+# Manual configuration in other for freeswitch to work with it's current version and also for kurent media server to work with it's specific version as well
+
+
+# Create a separate directory for FreeSWITCH's dependencies:
+
+sudo mkdir -p /opt/freeswitchlibs
+sudo cp /lib/x86_64-linux-gnu/libssl.so.1.1 /opt/freeswitchlibs/
+sudo cp /lib/x86_64-linux-gnu/libcrypto.so.1.1 /opt/freeswitchlibs/
+sudo cp /usr/lib/x86_64-linux-gnu/libcurl.so.4 /opt/freeswitchlibs
+
+# Modify FreeSWITCH service to use these specific libraries:
+
+sudo nano /etc/systemd/system/freeswitch.service.d/override.conf
+
+# Add this line in the [Service] section:
+# please take note only the below line should be included in the file to prevent more errors
+# take of how the Environment=<path>=<path of your custome folder>
+
+Environment="LD_LIBRARY_PATH=/opt/freeswitchlibs:$LD_LIBRARY_PATH"
+
+# Then run the following commands
+
+sudo systemctl daemon-reload
+sudo systemctl restart freeswitch
+sudo bbb-conf --restart
+
+# At worse case scenerio you can reboot the machine 
